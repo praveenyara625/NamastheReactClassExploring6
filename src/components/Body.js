@@ -6,9 +6,9 @@ import RestaurantCardSkeleton from "./RestaurantCardSkeleton";
 // what is React Hooks? - functions,
 // What is useState
 
-function filterData(searchText, restaurants) {
+function filterDataF(searchText, restaurants) {
   const filterData = restaurants.filter((restaurant) =>
-    restaurant.data.name.includes(searchText)
+    restaurant.data.data.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return filterData;
@@ -16,6 +16,7 @@ function filterData(searchText, restaurants) {
 
 const Body = () => {
   const [restaurants, setRestaurants] = useState([]);
+  const [filterData, setFilterData] = useState([]);
   const [searchText, setSearchText] = useState("");
   let arr = [...Array(15)].map((i) => {
     return i;
@@ -31,6 +32,7 @@ const Body = () => {
     let json = await data.json();
     console.log(json.data.cards);
     setRestaurants(json.data.cards);
+    setFilterData(json.data.cards);
   }
 
   return (
@@ -43,19 +45,12 @@ const Body = () => {
           value={searchText}
           onChange={(e) => {
             setSearchText(e.target.value);
+            const data = filterDataF(e.target.value, restaurants);
+            // update the state - restaurants
+            setFilterData(data);
           }}
         />
-        <button
-          className="search-btn"
-          onClick={() => {
-            //need to filter the data
-            const data = filterData(searchText, restaurants);
-            // update the state - restaurants
-            setRestaurants(data);
-          }}
-        >
-          Search
-        </button>
+        <p style={{ display: "inline" }}>Search</p>
       </div>
 
       {/* The major difference is that you can specify custom computation with
@@ -64,6 +59,15 @@ const Body = () => {
         {restaurants.length === 0
           ? arr.map(() => {
               return <RestaurantCardSkeleton />;
+            })
+          : searchText.length > 0
+          ? filterData.map((restaurant) => {
+              return (
+                <RestaurantCard
+                  {...restaurant.data.data}
+                  key={restaurant.data.data.id}
+                />
+              );
             })
           : restaurants.map((restaurant) => {
               return (
